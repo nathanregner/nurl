@@ -8,7 +8,7 @@ impl_fetcher!(FetchPypi);
 impl<'a> SimpleFetcher<'a, 1> for FetchPypi {
     const KEYS: [&'static str; 1] = ["pname"];
     const NAME: &'static str = "fetchPypi";
-    const REV_KEY: &'static str = "version";
+    const REV_KEY: Option<&'static str> = Some("version");
 
     fn get_values(&self, url: &'a Url) -> Option<[&'a str; 1]> {
         let pname = url.path_segments().nth(1)?;

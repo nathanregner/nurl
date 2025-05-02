@@ -11,7 +11,7 @@ impl<'a> SimpleFetcher<'a, 1> for FetchHex {
     const HASH_KEY: &'static str = "sha256";
     const KEYS: [&'static str; 1] = ["pkg"];
     const NAME: &'static str = "fetchHex";
-    const REV_KEY: &'static str = "version";
+    const REV_KEY: Option<&'static str> = Some("version");
 
     fn get_values(&self, url: &'a Url) -> Option<[&'a str; 1]> {
         Some([url.path_segments().nth(1)?])

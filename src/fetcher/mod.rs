@@ -8,6 +8,7 @@ mod gitiles;
 mod gitlab;
 mod hex;
 mod hg;
+mod patch;
 mod pypi;
 mod repo_or_cz;
 mod sourcehut;
@@ -22,7 +23,7 @@ use rustc_hash::FxHashMap;
 pub use self::{
     bitbucket::FetchFromBitbucket, builtin_git::BuiltinsFetchGit, crates_io::FetchCrate,
     git::Fetchgit, gitea::FetchFromGitea, github::FetchFromGitHub, gitiles::FetchFromGitiles,
-    gitlab::FetchFromGitLab, hex::FetchHex, hg::Fetchhg, pypi::FetchPypi,
+    gitlab::FetchFromGitLab, hex::FetchHex, hg::Fetchhg, patch::FetchPatch, pypi::FetchPypi,
     repo_or_cz::FetchFromRepoOrCz, sourcehut::FetchFromSourcehut, svn::Fetchsvn,
 };
 use crate::Url;
@@ -81,6 +82,7 @@ pub enum FetcherDispatch<'a> {
     FetchFromRepoOrCz(FetchFromRepoOrCz),
     FetchFromSourcehut(FetchFromSourcehut<'a>),
     FetchHex(FetchHex),
+    FetchPatch(FetchPatch),
     FetchPypi(FetchPypi),
     Fetchgit(Fetchgit),
     Fetchhg(Fetchhg),
@@ -208,8 +210,8 @@ macro_rules! impl_fetcher {
                 if let Some(group) = self.group() {
                     fetcher_args["group"] = json!(group);
                 }
-                if let Some(rev) = rev {
-                    fetcher_args[Self::REV_KEY] = json!(rev);
+                if let (Some(rev_key), Some(rev)) = (Self::REV_KEY, rev) {
+                    fetcher_args[rev_key] = json!(rev);
                 }
 
                 serde_json::to_writer(

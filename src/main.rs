@@ -14,6 +14,7 @@ use std::{
 use anyhow::{bail, Result};
 use bstr::ByteSlice;
 use clap::{Parser, ValueEnum};
+use fetcher::FetchPatch;
 use gix_url::Scheme;
 use is_terminal::IsTerminal;
 use itertools::Itertools;
@@ -185,6 +186,8 @@ fn main() -> Result<()> {
             bail!("fetchHex only supports hex.pm");
         }
 
+        (Some(FetcherFunction::FetchPatch), ..) => FetchPatch.into(),
+
         (None | Some(FetcherFunction::FetchPypi), Some("pypi.org"), _) => FetchPypi.into(),
         (Some(FetcherFunction::FetchPypi), ..) => {
             bail!("fetchPypi only supports pypi.org");
@@ -229,6 +232,7 @@ fn main() -> Result<()> {
             FetcherFunction::FetchHex => {
                 bail!("fetchHex only supports hex.pm");
             }
+            FetcherFunction::FetchPatch => FetchPatch.into(),
             FetcherFunction::FetchPypi => {
                 bail!("fetchPypi only supports pypi.org");
             }

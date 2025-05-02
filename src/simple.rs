@@ -15,7 +15,7 @@ pub trait SimpleFetcher<'a, const N: usize> {
     const HOST_KEY: &'static str = "domain";
     const KEYS: [&'static str; N];
     const NAME: &'static str;
-    const REV_KEY: &'static str = "rev";
+    const REV_KEY: Option<&'static str> = Some("rev");
     const SUBMODULES_DEFAULT: bool = false;
     const SUBMODULES_KEY: Option<&'static str> = None;
 
@@ -45,6 +45,9 @@ pub trait SimpleFetcher<'a, const N: usize> {
     }
 
     fn fetch_rev(&self, _: &[&str; N]) -> Result<String> {
+        if Self::REV_KEY.is_none() {
+            return Ok("".to_string());
+        }
         bail!(
             "{} does not support fetching the latest revision",
             Self::NAME,
@@ -74,12 +77,20 @@ pub trait SimpleFetcher<'a, const N: usize> {
             write!(expr, r#"{key}="{value}";"#)?;
         }
 
-        write!(
-            expr,
-            r#"{}="{rev}";{}="sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";"#,
-            Self::REV_KEY,
-            Self::HASH_KEY,
-        )?;
+        if let Some(rev_key) = Self::REV_KEY {
+            write!(
+                expr,
+                r#"{}="{rev}";{}="sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";"#,
+                rev_key,
+                Self::HASH_KEY,
+            )?;
+        } else {
+            write!(
+                expr,
+                r#"{}="sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";"#,
+                Self::HASH_KEY,
+            )?;
+        }
 
         if submodules {
             if let Some(key) = Self::SUBMODULES_KEY {
@@ -135,10 +146,12 @@ pub trait SimpleFetcher<'a, const N: usize> {
             }
         }
 
-        if let Some(rev) = overwrites.remove(Self::REV_KEY) {
-            writeln!(out, "{indent}  {} = {rev};", Self::REV_KEY)?;
-        } else {
-            writeln!(out, r#"{indent}  {} = "{rev}";"#, Self::REV_KEY)?;
+        if let Some(rev_key) = Self::REV_KEY {
+            if let Some(rev) = overwrites.remove(rev_key) {
+                writeln!(out, "{indent}  {} = {rev};", rev_key)?;
+            } else {
+                writeln!(out, r#"{indent}  {} = "{rev}";"#, rev_key)?;
+            }
         }
         if let Some(hash) = overwrites.remove(Self::HASH_KEY) {
             writeln!(out, "{indent}  {} = {hash};", Self::HASH_KEY)?;
@@ -187,10 +200,16 @@ pub trait SimpleFetcher<'a, const N: usize> {
         overwrites: Vec<(String, String)>,
         overwrites_str: Vec<(String, String)>,
     ) -> Result<()> {
-        let mut fetcher_args = Value::from_iter(Self::KEYS.into_iter().zip(*values).chain([
-            (Self::REV_KEY, rev.as_ref()),
-            (Self::HASH_KEY, hash.as_ref()),
-        ]));
+        let mut fetcher_args = Value::from_iter(
+            Self::KEYS
+                .into_iter()
+                .zip(*values)
+                .chain([(Self::HASH_KEY, hash.as_ref())]),
+        );
+
+        if let Some(rev_key) = Self::REV_KEY {
+            fetcher_args[rev_key] = json!(rev);
+        }
 
         if let Some(host) = self.host() {
             fetcher_args[Self::HOST_KEY] = json!(host);

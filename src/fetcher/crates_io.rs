@@ -10,7 +10,7 @@ impl_fetcher!(FetchCrate);
 impl SimpleFetcher<'_, 1> for FetchCrate {
     const KEYS: [&'static str; 1] = ["pname"];
     const NAME: &'static str = "fetchCrate";
-    const REV_KEY: &'static str = "version";
+    const REV_KEY: Option<&'static str> = Some("version");
 
     fn get_values<'a>(&self, url: &'a Url) -> Option<[&'a str; 1]> {
         let mut xs = url.path_segments();
