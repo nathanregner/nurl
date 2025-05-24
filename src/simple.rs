@@ -148,9 +148,9 @@ pub trait SimpleFetcher<'a, const N: usize> {
 
         if let Some(rev_key) = Self::REV_KEY {
             if let Some(rev) = overwrites.remove(rev_key) {
-                writeln!(out, "{indent}  {} = {rev};", rev_key)?;
+                writeln!(out, "{indent}  {rev_key} = {rev};")?;
             } else {
-                writeln!(out, r#"{indent}  {} = "{rev}";"#, rev_key)?;
+                writeln!(out, r#"{indent}  {rev_key} = "{rev}";"#)?;
             }
         }
         if let Some(hash) = overwrites.remove(Self::HASH_KEY) {
