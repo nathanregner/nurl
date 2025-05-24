@@ -107,6 +107,8 @@ fn main() -> Result<()> {
     let fetcher: FetcherDispatch = match (opts.fetcher, url.host(), &url.scheme) {
         (Some(FetcherFunction::BuiltinsFetchGit), ..) => BuiltinsFetchGit.into(),
 
+        (None, ..) if url.path.ends_with_str(".patch") => FetchPatch.into(),
+
         (None | Some(FetcherFunction::FetchCrate), Some("crates.io"), _) => FetchCrate(true).into(),
         (None | Some(FetcherFunction::FetchCrate), Some("lib.rs"), _) => FetchCrate(false).into(),
         (Some(FetcherFunction::FetchCrate), ..) => {
@@ -186,7 +188,7 @@ fn main() -> Result<()> {
             bail!("fetchHex only supports hex.pm");
         }
 
-        (Some(FetcherFunction::FetchPatch), ..) => FetchPatch.into(),
+        (Some(FetcherFunction::Fetchpatch), ..) => FetchPatch.into(),
 
         (None | Some(FetcherFunction::FetchPypi), Some("pypi.org"), _) => FetchPypi.into(),
         (Some(FetcherFunction::FetchPypi), ..) => {
@@ -232,7 +234,7 @@ fn main() -> Result<()> {
             FetcherFunction::FetchHex => {
                 bail!("fetchHex only supports hex.pm");
             }
-            FetcherFunction::FetchPatch => FetchPatch.into(),
+            FetcherFunction::Fetchpatch => FetchPatch.into(),
             FetcherFunction::FetchPypi => {
                 bail!("fetchPypi only supports pypi.org");
             }

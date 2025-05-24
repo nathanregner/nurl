@@ -119,7 +119,7 @@ pub enum FetcherFunction {
     FetchFromRepoOrCz,
     FetchFromSourcehut,
     FetchHex,
-    FetchPatch,
+    Fetchpatch,
     FetchPypi,
     Fetchgit,
     Fetchhg,

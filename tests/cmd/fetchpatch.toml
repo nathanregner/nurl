@@ -1,0 +1,3 @@
+args = [
+  "https://github.com/nix-community/nurl/commit/3a3ba7f0d14d92e1266395d826c6e229797d0044.patch",
+]
